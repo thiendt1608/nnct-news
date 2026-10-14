@@ -29,6 +29,8 @@ type Source struct {
 	MinPoints int     `yaml:"min_points"`
 	Disabled  bool    `yaml:"-"`
 	Enabled   *bool   `yaml:"enabled"`
+	// Aggregator: trang tổng hợp link (HN, Lobsters). Không tính vào n_sources của cluster.
+	Aggregator bool `yaml:"aggregator"`
 }
 
 type Profile struct {

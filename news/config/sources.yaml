@@ -17,6 +17,6 @@ sources:
   - {id: simonwillison, name: "Simon Willison",    kind: rss, url: "https://simonwillison.net/atom/everything/", lang: en, section: ai, weight: 1.0}
   - {id: github-blog, name: "GitHub Blog",      kind: rss, url: "https://github.blog/feed/", lang: en, section: dev, weight: 0.8}
   - {id: cloudflare-blog, name: "Cloudflare",  kind: rss, url: "https://blog.cloudflare.com/rss/", lang: en, section: dev, weight: 0.8}
-  - {id: hn-top, name: "Hacker News",           kind: hn, min_points: 100, url: "https://hacker-news.firebaseio.com/v0/topstories.json", lang: en, section: tech, weight: 1.0}
-  - {id: lobsters, name: "Lobsters",         kind: rss, url: "https://lobste.rs/rss", lang: en, section: dev, weight: 0.7}
+  - {id: hn-top, name: "Hacker News", aggregator: true,           kind: hn, min_points: 100, url: "https://hacker-news.firebaseio.com/v0/topstories.json", lang: en, section: tech, weight: 1.0}
+  - {id: lobsters, name: "Lobsters", aggregator: true,         kind: rss, url: "https://lobste.rs/rss", lang: en, section: dev, weight: 0.7}
   - {id: devto, name: "DEV",            kind: rss, url: "https://dev.to/feed", lang: en, section: dev, weight: 0.5}

@@ -137,18 +137,23 @@ func (p *pipeline) refreshCluster(ctx context.Context, id int64) error {
 		return err
 	}
 
-	srcSeen := map[string]float64{}
+	srcSeen := map[string]float64{} // chỉ nguồn không phải aggregator
+	allSeen := map[string]float64{}
 	maxPts, maxRel := 0, 0
 	topicCount := map[string]int{}
 	var best memberRow
 	first := ms[0].published
 	var titles []string
 	for _, m := range ms {
-		srcSeen[m.sourceID] = m.weight
+		allSeen[m.sourceID] = m.weight
+		if !p.isAggregator(m.sourceID) {
+			srcSeen[m.sourceID] = m.weight
+		}
 		if m.points > maxPts {
 			maxPts = m.points
 		}
-		if m.weight > best.weight || best.sourceID == "" {
+		if best.sourceID == "" || (p.isAggregator(best.sourceID) && !p.isAggregator(m.sourceID)) ||
+			(p.isAggregator(best.sourceID) == p.isAggregator(m.sourceID) && m.weight > best.weight) {
 			best = m
 		}
 		if m.published.Before(first) {
@@ -175,12 +180,24 @@ func (p *pipeline) refreshCluster(ctx context.Context, id int64) error {
 		}
 		return topics[i] < topics[j]
 	})
+	// Cluster chỉ gồm aggregator (bài ngoài danh sách nguồn): tính là 1 nguồn.
+	nSources := len(srcSeen)
+	if nSources == 0 {
+		srcSeen, nSources = allSeen, 1
+	}
+	var sections []string
+	for _, m := range ms {
+		if _, ok := srcSeen[m.sourceID]; ok {
+			sections = append(sections, m.section)
+		}
+	}
+	section := brain.ClusterSection(topics, sections, best.section)
 	sumW := 0.0
 	for _, w := range srcSeen {
 		sumW += w
 	}
 	in := brain.ScoreInput{
-		NSources:    len(srcSeen),
+		NSources:    nSources,
 		Engagement:  maxPts,
 		AvgWeight:   sumW / float64(len(srcSeen)),
 		Relevance:   maxRel,
@@ -192,9 +209,14 @@ func (p *pipeline) refreshCluster(ctx context.Context, id int64) error {
 	rj, _ := json.Marshal(reason)
 	_, err = db.Exec(ctx, `UPDATE clusters SET n_sources = $2, max_engagement = $3, section = $4, topics = $5,
 		hot_score = $6, hot_reason = $7::jsonb, first_seen = $8 WHERE id = $1`,
-		id, len(srcSeen), maxPts, best.section, topics, reason.Total, string(rj), first)
+		id, nSources, maxPts, section, topics, reason.Total, string(rj), first)
 	if err != nil {
 		return fmt.Errorf("cluster %d: %w", id, err)
 	}
 	return nil
+}
+
+func (p *pipeline) isAggregator(sourceID string) bool {
+	s, ok := p.sourceByID(sourceID)
+	return ok && s.Aggregator
 }

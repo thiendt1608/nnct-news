@@ -22,6 +22,13 @@ func TestLoadEmbedded(t *testing.T) {
 	if vb == nil || !vb.Disabled {
 		t.Fatal("venturebeat-ai phải bị disabled")
 	}
+	agg := map[string]bool{}
+	for _, s := range c.Sources {
+		agg[s.ID] = s.Aggregator
+	}
+	if !agg["hn-top"] || !agg["lobsters"] || agg["techcrunch"] {
+		t.Fatalf("aggregator flag sai: %v", agg)
+	}
 	if c.Settings.Models["gemini-embedding-2"].DailyBudget != 800 {
 		t.Fatal("budget embed sai")
 	}

@@ -473,3 +473,46 @@ func TestDBUsage(t *testing.T) {
 		t.Fatal("ngày khác phải tách riêng")
 	}
 }
+
+// Aggregator (HN/Lobsters) không tính vào n_sources; section theo chủ đề chứ không theo nguồn.
+func TestAggregatorNotCountedAndSectionByTopic(t *testing.T) {
+	resetDB(t)
+	pub := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprint(w, rss([2]string{"event-A OpenAI ra mô hình", "https://p.example/1"}))
+	}))
+	defer pub.Close()
+	agg := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprint(w, rss([2]string{"event-A OpenAI ra mô hình (thảo luận)", "https://agg.example/x"}))
+	}))
+	defer agg.Close()
+	p, _, _ := newTestPipeline(t, []config.Source{
+		{ID: "pub", Name: "Pub", Kind: "rss", URL: pub.URL, Lang: "en", Section: "tech", Weight: 1},
+		{ID: "agg", Name: "Agg", Kind: "rss", URL: agg.URL, Lang: "en", Section: "tech", Weight: 1, Aggregator: true},
+	})
+	if _, err := p.runIngest(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	if n := count(t, `SELECT count(*) FROM clusters`); n != 1 {
+		t.Fatalf("clusters=%d", n)
+	}
+	if n := count(t, `SELECT n_sources FROM clusters`); n != 1 {
+		t.Fatalf("n_sources=%d, aggregator không được tính", n)
+	}
+	var sec string
+	if err := db.QueryRow(context.Background(), `SELECT section FROM clusters`).Scan(&sec); err != nil || sec != "ai" {
+		t.Fatalf("section=%q err=%v (nguồn là tech nhưng chủ đề ai-models)", sec, err)
+	}
+	if n := count(t, `SELECT count(*) FROM items WHERE cluster_id IS NOT NULL`); n != 2 {
+		t.Fatal("cả hai item vẫn nằm trong cluster")
+	}
+
+	// cluster chỉ có aggregator → tính 1 nguồn
+	resetDB(t)
+	p2, _, _ := newTestPipeline(t, []config.Source{{ID: "agg", Name: "Agg", Kind: "rss", URL: agg.URL, Lang: "en", Section: "tech", Weight: 1, Aggregator: true}})
+	if _, err := p2.runIngest(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	if n := count(t, `SELECT n_sources FROM clusters`); n != 1 {
+		t.Fatalf("chỉ aggregator: n_sources=%d", n)
+	}
+}

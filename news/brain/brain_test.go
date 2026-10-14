@@ -157,3 +157,24 @@ func TestSummaryValidate(t *testing.T) {
 		t.Fatalf("low_context cho phép ít ý: %v", err)
 	}
 }
+
+func TestClusterSection(t *testing.T) {
+	cases := []struct {
+		topics, srcs []string
+		best, want   string
+	}{
+		{[]string{"ai-models"}, []string{"tech", "tech"}, "tech", "ai"}, // tin OpenAI từ HN/Verge
+		{[]string{"ai-engineering"}, []string{"vn"}, "vn", "vn"},        // chỉ báo VN → giữ vn
+		{[]string{"ai-models"}, []string{"vn", "tech"}, "tech", "ai"},   // có cả nguồn ngoài → theo chủ đề
+		{[]string{"dev-tools"}, []string{"tech"}, "tech", "dev"},
+		{[]string{"security"}, []string{"ai"}, "ai", "tech"},
+		{[]string{"other"}, []string{"dev"}, "dev", "dev"},
+		{nil, []string{"vn", "tech"}, "vn", "tech"},
+		{nil, nil, "ai", "ai"},
+	}
+	for i, c := range cases {
+		if got := ClusterSection(c.topics, c.srcs, c.best); got != c.want {
+			t.Errorf("case %d: %s, want %s", i, got, c.want)
+		}
+	}
+}
