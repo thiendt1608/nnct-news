@@ -1,0 +1,22 @@
+# kind: rss | hn. section: ai | tech | dev | vn
+sources:
+  - {id: vnexpress-sohoa,  kind: rss, url: "https://vnexpress.net/rss/so-hoa.rss", lang: vi, section: vn, weight: 1.0}
+  - {id: vnexpress-khoahoc, kind: rss, url: "https://vnexpress.net/rss/khoa-hoc-cong-nghe.rss", lang: vi, section: vn, weight: 0.9}
+  - {id: tuoitre-nhipsongso, kind: rss, url: "https://tuoitre.vn/rss/nhip-song-so.rss", lang: vi, section: vn, weight: 0.9}
+  - {id: genk,             kind: rss, url: "https://genk.vn/rss/home.rss", lang: vi, section: vn, weight: 0.8}
+  - {id: techcrunch,       kind: rss, url: "https://techcrunch.com/feed/", lang: en, section: tech, weight: 1.0}
+  - {id: theverge,         kind: rss, url: "https://www.theverge.com/rss/index.xml", lang: en, section: tech, weight: 0.9}
+  - {id: arstechnica,      kind: rss, url: "https://feeds.arstechnica.com/arstechnica/index", lang: en, section: tech, weight: 0.9}
+  - {id: wired,            kind: rss, url: "https://www.wired.com/feed/rss", lang: en, section: tech, weight: 0.7}
+  - {id: mit-tr-ai,        kind: rss, url: "https://www.technologyreview.com/topic/artificial-intelligence/feed", lang: en, section: ai, weight: 1.0}
+  - {id: venturebeat-ai,   kind: rss, url: "https://venturebeat.com/category/ai/feed/", lang: en, section: ai, weight: 0.8, enabled: false}  # 429 khi kiểm 2026-10-14
+  - {id: openai-blog,      kind: rss, url: "https://openai.com/news/rss.xml", lang: en, section: ai, weight: 1.2}
+  - {id: google-ai-blog,   kind: rss, url: "https://blog.google/technology/ai/rss/", lang: en, section: ai, weight: 1.1}
+  - {id: deepmind-blog,    kind: rss, url: "https://deepmind.google/blog/rss.xml", lang: en, section: ai, weight: 1.0}
+  - {id: huggingface-blog, kind: rss, url: "https://huggingface.co/blog/feed.xml", lang: en, section: ai, weight: 1.0}
+  - {id: simonwillison,    kind: rss, url: "https://simonwillison.net/atom/everything/", lang: en, section: ai, weight: 1.0}
+  - {id: github-blog,      kind: rss, url: "https://github.blog/feed/", lang: en, section: dev, weight: 0.8}
+  - {id: cloudflare-blog,  kind: rss, url: "https://blog.cloudflare.com/rss/", lang: en, section: dev, weight: 0.8}
+  - {id: hn-top,           kind: hn,  url: "https://hacker-news.firebaseio.com/v0/topstories.json", lang: en, section: tech, weight: 1.0}
+  - {id: lobsters,         kind: rss, url: "https://lobste.rs/rss", lang: en, section: dev, weight: 0.7}
+  - {id: devto,            kind: rss, url: "https://dev.to/feed", lang: en, section: dev, weight: 0.5}

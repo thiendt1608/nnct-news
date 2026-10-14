@@ -1,0 +1,8 @@
+.env*
+*.session
+*.pkl
+.DS_Store
+.encore/
+encore.gen.go
+encore.gen.cue
+node_modules/
