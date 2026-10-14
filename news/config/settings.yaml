@@ -1,0 +1,26 @@
+# Giá trị limit lấy từ docs/DESIGN.md §9 (AI Studio, 2026-10-14). Sửa ở đây khi Google đổi.
+models:
+  gemini-3.1-flash-lite: {min_interval: 8s, tokens_per_min: 200000, daily_budget: 400}
+  gemini-3.5-flash-lite: {min_interval: 8s, tokens_per_min: 200000, daily_budget: 400}
+  gemini-embedding-2:    {min_interval: 1s, tokens_per_min: 24000,  daily_budget: 800}
+
+triage_models: [gemini-3.1-flash-lite, gemini-3.5-flash-lite]
+summary_models: [gemini-3.1-flash-lite, gemini-3.5-flash-lite]
+embedding_model: gemini-embedding-2
+embedding_dim: 768
+
+triage_batch: 40
+triage_max_batches_per_run: 6
+embed_batch: 80
+embed_max_batches_per_run: 5
+min_relevance: 4
+cluster_threshold: 0.82
+cluster_window_hours: 48
+max_item_age_hours: 48
+
+digest_size: 20
+max_per_section: 7
+min_vn: 3
+max_per_topic: 4
+resend_min_new_sources: 3
+telegram_pacing: 1100ms

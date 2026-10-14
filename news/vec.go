@@ -1,8 +1,11 @@
 package news
 
 import (
+	"errors"
 	"strconv"
 	"strings"
+
+	"encore.dev/storage/sqldb"
 )
 
 // vecLiteral formats a vector as a pgvector text literal ('[0.1,0.2,...]'),
@@ -19,3 +22,5 @@ func vecLiteral(v []float32) string {
 	b.WriteByte(']')
 	return b.String()
 }
+
+func isNoRows(err error) bool { return errors.Is(err, sqldb.ErrNoRows) }
