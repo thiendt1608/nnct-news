@@ -422,7 +422,7 @@ Nguồn: ảnh chụp trang [AI Studio rate-limit](https://aistudio.google.com/r
 | **Gemini 3.5 Flash-Lite** | 10 | 250K | **500** | ✅ tóm tắt |
 | Gemini 2.5 Flash-Lite | 10 | 250K | 20 | RPD quá thấp để làm triage |
 | Gemini 2.5 / 3 / 3.6 / 3.7 / 3.8 Flash | 5 | 250K | 20 | Mỗi model đủ đúng 20 tóm tắt/ngày → dùng làm fallback cho tóm tắt |
-| **Gemma 4 26B / 31B** | 30 | **16K** | 14.4K | Fallback triage, TPM thấp nên phải gom ít item |
+| ~~Gemma 4 26B / 31B~~ | 30 | 16K | 14.4K | **Bỏ khỏi kế hoạch** (2026-10-14): spike trả 500, owner quyết định không dùng |
 | **Gemini Embedding 2** | 100 | **30K** | **1K** | ✅ embedding. Embedding 1 có limit y hệt |
 | Gemini 2 Flash / 2 Flash Lite, 2.5 Pro, 3.1 Pro, 4 Argon | 0 | — | — | Free tier không dùng được |
 
@@ -432,12 +432,13 @@ Con số đọc từ ảnh chụp, Google có thể đổi bất cứ lúc nào 
 
 | Việc | Model chính | Fallback 1 | Fallback 2 |
 |---|---|---|---|
-| Triage | Gemini 3.1 Flash-Lite | Gemma 4 31B (batch 15 item để vừa TPM 16K) | — (để item ở `new`, lượt sau làm) |
-| Tóm tắt | Gemini 3.5 Flash-Lite | Gemini 3.1 Flash-Lite | Gemini 3.8 Flash (20 RPD) |
+| Triage | Gemini 3.1 Flash-Lite | Gemini 3.5 Flash-Lite | — (hết quota thì **delay**: để item ở `new`, lượt sau làm) |
+| Tóm tắt | Gemini 3.1 Flash-Lite | Gemini 3.5 Flash-Lite | — (hết quota thì delay) |
 | Embedding | Gemini Embedding 2 | **Không fallback**: vector của model khác nằm ở không gian khác, trộn vào thì cluster sai. Thiếu quota thì để item ở `triaged`, lượt sau embed tiếp | |
 
 - Triage và tóm tắt dùng **hai model khác nhau** nên mỗi việc có quota 500 RPD riêng. Tóm tắt dùng bản 3.5 vì là bản mới hơn (giá paid cũng cao hơn), kỳ vọng viết tiếng Việt tốt hơn: **not verified**, so sánh 2 model trên data thật ở phase 0.
-- Gemma 4 có hỗ trợ structured output qua Gemini API hay không: **not verified**. Nếu không thì dùng JSON trong prompt và validate bằng code.
+- Gemma đã bỏ khỏi kế hoạch. Hết quota mọi model trong chuỗi thì delay.
+- Owner ưu tiên model rẻ/quota nhiều hơn chất lượng tiếng Việt. 3.1 và 3.5 Flash-Lite có limit free y hệt (500 RPD), 3.1 rẻ hơn theo giá paid → dùng **3.1 cho cả triage lẫn tóm tắt**, 3.5 làm fallback (quota riêng theo model). Nhu cầu ~50 request/ngày, thừa xa 500.
 - Tên model + thứ tự fallback nằm trong config. Model nào bị gỡ thì chỉ sửa config.
 
 ### 9.3 Cấu hình throttle (để dư ~20–30% so với limit)
@@ -446,11 +447,10 @@ Con số đọc từ ảnh chụp, Google có thể đổi bất cứ lúc nào 
 |---|---|---|---|---|
 | 3.1 Flash-Lite (triage) | 8s (≈7,5 RPM) | 200K | 400 | ~25–30 request |
 | 3.5 Flash-Lite (tóm tắt) | 8s | 200K | 400 | 20 + `/more` |
-| Gemma 4 31B | 5s | 12K | 10.000 | chỉ khi fallback |
 | Embedding 2 | 1s | **24K** | **800** | 10–25 request (xem lưu ý) |
 
 - Client có **2 limiter cho mỗi model**: một theo request (`rate.Limiter`) và một theo token, với số token ước tính `len(text)/3` trước khi gọi. Mỗi request tóm tắt ~25K token (3 bài × 8K), nên limiter token tự giãn nhịp ra.
-- **Embedding là chỗ sát limit nhất.** TPM chỉ 30K, nên mỗi batch embed tối đa ~80 text (~100 token/text ≈ 8K token). Chỉ embed item đã qua triage (ước tính ~40–60% item), cắt text còn title + 300 ký tự đầu snippet. Batch request tính là 1 hay N request vào RPD: **not verified**. Trường hợp xấu nhất (tính N) thì ~400–600 item/ngày vẫn dưới 1K RPD. Phase 0 đo thật trên AI Studio.
+- **Embedding là chỗ sát limit nhất.** TPM chỉ 30K, nên mỗi batch embed tối đa ~80 text (~100 token/text ≈ 8K token). Chỉ embed item đã qua triage (ước tính ~40–60% item), cắt text còn title + 300 ký tự đầu snippet. **Đã đo 2026-10-14: batch N text tính N request vào RPD** (batch 3 → usage tăng 3), nên batch chỉ tiết kiệm round-trip, không tiết kiệm quota. Ước tính ~400–600 item/ngày vẫn dưới 1K RPD. Phase 0 đo thật trên AI Studio.
 - Hai cron (ingest, digest) dùng chung bảng `llm_usage` nên không vượt budget ngày.
 - **Dùng project Google riêng cho bot.** Quota tính theo project, mà ảnh chụp cho thấy project hiện tại đã có traffic (3.8 Flash đã dùng 26 RPD, 3.1 Flash-Lite 33 RPD). Tạo project mới để bot không giành quota với việc khác.
 

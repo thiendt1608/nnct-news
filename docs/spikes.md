@@ -13,7 +13,7 @@
 - `gemini-3.5-flash-lite` + `responseSchema`: OK, JSON đúng schema. Response có thêm `thoughtSignature` (model có thinking) → parser chỉ lấy `text`, bỏ qua field lạ.
 - `gemini-embedding-2` + `outputDimensionality=768`: OK, 3 vector × 768 chiều.
 
-Chưa kết luận:
-- `gemma-4-31b-it` + schema: HTTP 500 INTERNAL. Có thể do lỗi tạm thời hoặc không hỗ trợ `responseSchema`; chưa phân biệt được. Cần chạy lại, thử không có schema (JSON trong prompt). Cho tới lúc đó coi Gemma **không** có structured output, validate JSON bằng code.
-- Batch embed tính 1 hay N request: tool không đo được. Cách đo: xem số request `gemini-embedding-2` trong AI Studio → Usage trước/sau một lần chạy (đã gửi 1 batch gồm 3 text).
-- Chất lượng tóm tắt 3.5 vs 3.1 FL trên 5 bài VN thật: chưa làm. Mới thấy trên 1 prompt ngắn: 3.1 viết đầy đủ hơn 3.5. Chưa đủ để kết luận.
+Quyết định owner (2026-10-14):
+- **Bỏ Gemma** khỏi kế hoạch (spike trả 500). Hết quota thì delay.
+- Dùng **3.1 Flash-Lite** cho cả triage và tóm tắt (limit giống 3.5, rẻ hơn); 3.5 là fallback. Không cần so chất lượng tiếng Việt nữa.
+- **Batch embed tính N request**: batch 3 text làm usage `gemini-embedding-2` tăng 3. Budget embed 800/ngày = tối đa ~800 item/ngày.

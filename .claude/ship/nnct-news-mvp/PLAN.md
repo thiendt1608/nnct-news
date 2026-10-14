@@ -61,7 +61,7 @@ Lưu ý: `//go:embed` không đọc được file ngoài thư mục package (kh�
 | T1.2 ∥ | Fetchers RSS + Hacker News (Firebase API), User-Agent riêng, ETag/If-Modified-Since, timeout 10s, `errgroup.SetLimit(8)`, đếm lỗi → tự tắt nguồn | `news/ingest/rss.go`, `hn.go`, `fetch.go` | `httptest` server + fixture feed VN/EN; 304 không tạo item; lỗi 5 lần → `enabled=false` |
 | T1.3 ∥ | Normalize + dedupe: canonical URL, title hash, bỏ item > 48h | `news/ingest/normalize.go`, `dedupe.go` | table test các kiểu URL (`utm_*`, `amp`, `m.`, trailing slash) |
 | T1.4 ∥ | **LLM client**: `genai` wrapper; limiter request + token theo model; retry 429/5xx (backoff + jitter, tôn trọng `retryDelay`); budget ngày lưu `llm_usage` theo ngày giờ Pacific; fallback chain; structured output helper | `news/llm/client.go`, `limiter.go`, `budget.go` | AC4: fake `http.RoundTripper` trả 429/500/200; budget chạm trần → `ErrBudgetExhausted` |
-| T1.5 | Triage: lấy `state='new'`, batch 40 (Gemma: 15), prompt + schema, cập nhật `triaged`/`dropped`, `attempts` | `news/brain/triage.go`, `prompts/triage.txt` | fake LLM; item `relevance<4`/`pr` → `dropped`; JSON hỏng → `attempts+1` |
+| T1.5 | Triage: lấy `state='new'`, batch 40, prompt + schema, cập nhật `triaged`/`dropped`, `attempts` | `news/brain/triage.go`, `prompts/triage.txt` | fake LLM; item `relevance<4`/`pr` → `dropped`; JSON hỏng → `attempts+1` |
 | T1.6 | Embed + cluster: batch ≤ 80 text, text = title + 300 ký tự snippet; tìm cluster gần nhất 48h, cosine ≥ 0.82 (config); cập nhật centroid, `n_sources` | `news/brain/embed.go`, `cluster.go` | DB test: 2 tin cùng sự kiện → chung cluster; khác sự kiện → tách |
 | T1.7 ∥ | Hot score (hàm thuần) + `hot_reason` | `news/brain/score.go` | table test từng thành phần, decay theo giờ |
 | T1.8 | Endpoint + cron ingest: `//encore:api private func Ingest`, chạy fetch → dedupe → triage → embed → cluster → score trong budget; cron `Every: 2 * cron.Hour` | `news/ingest_job.go`, `news/cron.go` | AC3 |
@@ -95,7 +95,7 @@ Weekly recap Chủ nhật, newsletter qua email, Bluesky. Lập plan riêng khi 
 | Rủi ro | Ảnh hưởng | Giảm thiểu |
 |---|---|---|
 | `halfvec` không truyền thẳng qua `sqldb` | chặn T1.6 | Spike T0.5 trước; fallback cast từ text |
-| Gemini đổi free tier / gỡ model / model không hỗ trợ structured output (Gemma) | pipeline đứng | Hàng đợi theo state, fallback chain, tên model + limit trong config; T0.6 kiểm Gemma |
+| Gemini đổi free tier / gỡ model / hết quota | pipeline đứng | Hàng đợi theo state, fallback chain 3.1 → 3.5 rồi delay, tên model + limit trong config; T0.6 kiểm Gemma |
 | Embedding TPM 30K; batch có thể bị tính N request vào RPD | item kẹt ở `triaged` | Batch ≤ 80, chỉ embed item đã qua triage; T0.6 đo thật |
 | Free tier: Google dùng dữ liệu để cải thiện sản phẩm | lộ dữ liệu nếu đưa nhầm | Prompt chỉ chứa tin công khai + profile chủ đề; không bao giờ có secret/data riêng |
 | RSS VN chết, đổi URL, chặn bot; readability fail; paywall | thiếu tin VN, tóm tắt mỏng | T0.7 kiểm từng feed; auto-disable + cảnh báo; cờ `low_context` |
