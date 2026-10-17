@@ -27,7 +27,17 @@ Với mỗi tin trong digest, điền 1 dòng trong bảng của ngày đó.
 
 Ghi chú ngắn gọn: nguồn nào hay lỗi, từ khoá nên mute/boost, số nào bịa.
 
-## Mẫu bảng một ngày
+## Xuất bảng tự động (khỏi gõ tay)
+
+Bảng đã điền sẵn tiêu đề, section bot gắn, nguồn, số nguồn, fallback, số click; chỉ còn các cột chấm.
+
+```bash
+encore db shell news --env=staging < tools/eval-export.sql | pbcopy
+```
+
+Cần `psql` trên máy (`brew install libpq && brew link --force libpq`). Dán kết quả vào "Nhật ký chấm" rồi điền cột Tóm tắt / Đáng đọc / Trùng / Section đúng / Cụm sai.
+
+## Mẫu bảng một ngày (nếu điền tay)
 
 Sao chép khối này cho mỗi ngày, đổi ngày.
 
