@@ -1,7 +1,9 @@
 # Changelog
 
 ## Unreleased
-- fix: section của cluster theo chủ đề chính (không theo nguồn), nguồn chỉ-VN mới là "vn".
+- feat: mở rộng danh sách chủ đề triage (agents, research, backend, cloud, architecture, system-design, software-engineering, algorithms, startup, vn, technology) kèm định nghĩa trong prompt; chủ đề `vn-tech-startup` tách thành `startup` + `vn`.
+- fix: section `vn` chỉ cho tin gắn chủ đề `vn`; báo VN đưa tin quốc tế (OpenAI, chip AI...) theo chủ đề thay vì bị gắn VN (11/120 tin chấm sai section, 7 ca do lỗi này).
+- fix: section của cluster theo chủ đề chính (không theo nguồn).
 - fix: aggregator (Hacker News, Lobsters) không tính vào `n_sources` và hot score.
 - fix: prompt tóm tắt chặt hơn (không bịa số liệu/thông số, ghi rõ cáo buộc/tự công bố, ngắn hơn ~150 từ, glossary chỉ thuật ngữ kỹ thuật).
 - feat: pipeline MVP — ingest RSS/HN (ETag, tự tắt nguồn lỗi), triage + embed + cluster (pgvector `halfvec`), hot score, chọn 20 tin có ràng buộc đa dạng, tóm tắt tiếng Việt, gửi Telegram (1 tin = 1 message, resume được), redirect `/r/:id` ghi click.

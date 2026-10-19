@@ -164,10 +164,17 @@ func TestClusterSection(t *testing.T) {
 		best, want   string
 	}{
 		{[]string{"ai-models"}, []string{"tech", "tech"}, "tech", "ai"}, // tin OpenAI từ HN/Verge
-		{[]string{"ai-engineering"}, []string{"vn"}, "vn", "vn"},        // chỉ báo VN → giữ vn
-		{[]string{"ai-models"}, []string{"vn", "tech"}, "tech", "ai"},   // có cả nguồn ngoài → theo chủ đề
+		{[]string{"ai-engineering"}, []string{"vn"}, "vn", "ai"},        // báo VN đưa tin quốc tế → theo chủ đề
+		{[]string{"ai-models", "vn"}, []string{"vn"}, "vn", "vn"},       // chủ đề vn ở vị trí nào cũng vào vn
+		{[]string{"vn", "startup"}, []string{"vn", "tech"}, "tech", "vn"},
+		{[]string{"agents"}, []string{"tech"}, "tech", "ai"},
+		{[]string{"research"}, []string{"tech"}, "tech", "ai"},
 		{[]string{"dev-tools"}, []string{"tech"}, "tech", "dev"},
+		{[]string{"backend", "cloud"}, []string{"tech"}, "tech", "dev"},
+		{[]string{"system-design"}, []string{"tech"}, "tech", "dev"},
+		{[]string{"algorithms"}, []string{"tech"}, "tech", "dev"},
 		{[]string{"security"}, []string{"ai"}, "ai", "tech"},
+		{[]string{"startup"}, []string{"tech"}, "tech", "tech"},
 		{[]string{"other"}, []string{"dev"}, "dev", "dev"},
 		{nil, []string{"vn", "tech"}, "vn", "tech"},
 		{nil, nil, "ai", "ai"},

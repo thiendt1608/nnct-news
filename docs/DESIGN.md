@@ -162,15 +162,25 @@ Lấy item `state = new`, gom ~40 item/request (title + snippet + tên nguồn),
 Profile sở thích (`config/profile.yaml`), mình tự sửa:
 
 ```yaml
-topics:            # trọng số ban đầu, feedback sẽ chỉnh
+topics:            # trọng số ban đầu, feedback sẽ chỉnh (danh sách đầy đủ + định nghĩa: news/brain/prompts/triage.txt)
   ai-models: 1.0        # model mới, benchmark, lab AI
-  ai-engineering: 1.0   # agent, RAG, tooling, inference
+  ai-engineering: 1.0   # RAG, inference, eval, tooling
+  agents: 1.0
+  research: 0.8
+  backend: 0.8
+  cloud: 0.7
+  architecture: 0.8
+  system-design: 0.8
+  software-engineering: 0.8
+  algorithms: 0.6
   dev-tools: 0.8
-  big-tech: 0.6
-  vn-tech-startup: 0.9
   security: 0.6
+  big-tech: 0.6
+  startup: 0.7
+  vn: 0.9               # tin về Việt Nam; báo VN đưa tin quốc tế không tính
   hardware-chips: 0.5
   policy-regulation: 0.5
+  technology: 0.5
 muted_keywords: [crypto airdrop, giveaway, khuyến mãi, review điện thoại]
 boosted_keywords: [Claude, Gemini, Anthropic, Next.js, Rust, Tauri, Encore, pgvector]
 ```

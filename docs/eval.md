@@ -111,6 +111,7 @@ ORDER BY di.rank;
 | Ngày | Triệu chứng | Thay đổi (file: giá trị cũ → mới) | Kết quả sau vài ngày |
 |---|---|---|---|
 | 2026-10-14 | #1 OpenAI gắn nhầm Tech; HN/Lobsters thổi phồng `n_sources`; tóm tắt có số liệu không có trong bài, dài | `cluster.go`: section theo chủ đề; `sources.yaml`: `aggregator: true` cho HN/Lobsters; `summarize.txt` siết chống bịa số | thử trên 3 bài: số bịa biến mất; chưa đo trên digest thật |
+| 2026-10-19 | Section sai 11/120 (9%, mục tiêu <5%): 7 ca tin quốc tế từ báo VN bị gắn `vn`; chủ đề quá hẹp (không có backend/cloud/agents...) | `triage.txt`: thêm 11 chủ đề + định nghĩa; `profile.yaml`: trọng số cho chủ đề mới; `section.go`: `vn` chỉ khi có chủ đề `vn` | chưa đo |
 
 ## Nhật ký chấm
 

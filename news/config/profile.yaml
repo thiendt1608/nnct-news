@@ -1,11 +1,21 @@
 topics:
   ai-models: 1.0
   ai-engineering: 1.0
+  agents: 1.0
+  research: 0.8
+  backend: 0.8
+  cloud: 0.7
+  architecture: 0.8
+  system-design: 0.8
+  software-engineering: 0.8
+  algorithms: 0.6
   dev-tools: 0.8
-  big-tech: 0.6
-  vn-tech-startup: 0.9
   security: 0.6
+  big-tech: 0.6
+  startup: 0.7
+  vn: 0.9
   hardware-chips: 0.5
   policy-regulation: 0.5
+  technology: 0.5
 muted_keywords: [crypto airdrop, giveaway, khuyến mãi, review điện thoại]
 boosted_keywords: [Claude, Gemini, Anthropic, Next.js, Rust, Tauri, Encore, pgvector]
