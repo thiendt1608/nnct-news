@@ -176,8 +176,7 @@ topics:            # trọng số ban đầu, feedback sẽ chỉnh (danh sách 
   dev-tools: 0.8
   security: 0.6
   big-tech: 0.6
-  startup: 0.7
-  vn: 0.9               # tin về Việt Nam; báo VN đưa tin quốc tế không tính
+  vn-tech-startup: 0.9  # tin về Việt Nam (startup, công ty, thị trường); báo VN đưa tin quốc tế không tính
   hardware-chips: 0.5
   policy-regulation: 0.5
   technology: 0.5

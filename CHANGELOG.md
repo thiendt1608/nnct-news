@@ -1,8 +1,8 @@
 # Changelog
 
 ## Unreleased
-- feat: mở rộng danh sách chủ đề triage (agents, research, backend, cloud, architecture, system-design, software-engineering, algorithms, startup, vn, technology) kèm định nghĩa trong prompt; chủ đề `vn-tech-startup` tách thành `startup` + `vn`.
-- fix: section `vn` chỉ cho tin gắn chủ đề `vn`; báo VN đưa tin quốc tế (OpenAI, chip AI...) theo chủ đề thay vì bị gắn VN (11/120 tin chấm sai section, 7 ca do lỗi này).
+- feat: mở rộng danh sách chủ đề triage (agents, research, backend, cloud, architecture, system-design, software-engineering, algorithms, technology) kèm định nghĩa trong prompt; giữ nguyên `vn-tech-startup`.
+- fix: section `vn` chỉ cho tin gắn chủ đề `vn-tech-startup`; báo VN đưa tin quốc tế (OpenAI, chip AI...) theo chủ đề thay vì bị gắn VN (11/120 tin chấm sai section, 7 ca do lỗi này).
 - fix: section của cluster theo chủ đề chính (không theo nguồn).
 - fix: aggregator (Hacker News, Lobsters) không tính vào `n_sources` và hot score.
 - fix: prompt tóm tắt chặt hơn (không bịa số liệu/thông số, ghi rõ cáo buộc/tự công bố, ngắn hơn ~150 từ, glossary chỉ thuật ngữ kỹ thuật).

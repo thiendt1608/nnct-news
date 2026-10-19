@@ -4,11 +4,11 @@ import "strings"
 
 // ClusterSection decides the digest section of a cluster.
 // Theo chủ đề của tin, không theo nguồn (tin OpenAI từ Hacker News hay GenK đều là "ai").
-// Tin gắn chủ đề "vn" (về Việt Nam hoặc tác động trực tiếp tới người dùng/công ty VN) vào section "vn"
+// Tin gắn chủ đề "vn-tech-startup" (về Việt Nam hoặc tác động trực tiếp tới người dùng/công ty VN) vào section "vn"
 // để giữ hạn mức tin VN; báo VN đưa tin quốc tế thì không tính.
 func ClusterSection(topics, sourceSections []string, bestSection string) string {
 	for _, t := range topics {
-		if t == "vn" {
+		if t == "vn-tech-startup" {
 			return "vn"
 		}
 	}
