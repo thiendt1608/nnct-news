@@ -21,6 +21,7 @@ func Ingest(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
+	p.ensureWebhook(ctx)
 	_, err = p.runIngest(ctx)
 	return err
 }

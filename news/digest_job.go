@@ -316,7 +316,11 @@ func (p *pipeline) sendPending(ctx context.Context, digestID int64, headerSent *
 			Rank: r.rank, Section: r.section, NSources: r.nSources, Summary: sum,
 			Fallback: r.fallback, Resend: r.resend, SourceNames: names, URL: btn,
 		})
-		msgID, err := p.tg.SendMessage(ctx, text, telegram.ItemMarkup(btn))
+		v, err := p.voted(ctx, r.clusterID) // tin gửi lại vẫn hiện nút đã bấm
+		if err != nil {
+			return err
+		}
+		msgID, err := p.tg.SendMessage(ctx, text, telegram.ItemMarkup(btn, r.clusterID, v))
 		if err != nil {
 			return fmt.Errorf("gửi tin #%d: %w", r.rank, err)
 		}

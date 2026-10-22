@@ -163,9 +163,9 @@ func TestClusterSection(t *testing.T) {
 		topics, srcs []string
 		best, want   string
 	}{
-		{[]string{"ai-models"}, []string{"tech", "tech"}, "tech", "ai"}, // tin OpenAI từ HN/Verge
-		{[]string{"ai-engineering"}, []string{"vn"}, "vn", "ai"},        // báo VN đưa tin quốc tế → theo chủ đề
-		{[]string{"ai-models", "vn-tech-startup"}, []string{"vn"}, "vn", "vn"},       // chủ đề vn-tech-startup ở vị trí nào cũng vào vn
+		{[]string{"ai-models"}, []string{"tech", "tech"}, "tech", "ai"},        // tin OpenAI từ HN/Verge
+		{[]string{"ai-engineering"}, []string{"vn"}, "vn", "ai"},               // báo VN đưa tin quốc tế → theo chủ đề
+		{[]string{"ai-models", "vn-tech-startup"}, []string{"vn"}, "vn", "vn"}, // chủ đề vn-tech-startup ở vị trí nào cũng vào vn
 		{[]string{"vn-tech-startup", "big-tech"}, []string{"vn", "tech"}, "tech", "vn"},
 		{[]string{"agents"}, []string{"tech"}, "tech", "ai"},
 		{[]string{"research"}, []string{"tech"}, "tech", "ai"},

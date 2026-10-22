@@ -105,19 +105,23 @@ func (p *pipeline) refreshClusters(ctx context.Context, since time.Time) error {
 	if err := crows.Err(); err != nil {
 		return err
 	}
+	tw, err := p.topicWeights(ctx)
+	if err != nil {
+		return err
+	}
 	for _, id := range ids {
-		if err := p.refreshCluster(ctx, id); err != nil {
+		if err := p.refreshCluster(ctx, id, tw); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (p *pipeline) refreshCluster(ctx context.Context, id int64) error {
+func (p *pipeline) refreshCluster(ctx context.Context, id int64, topicWeights map[string]float64) error {
 	rows, err := db.Query(ctx, `SELECT i.source_id, i.title, COALESCE(i.published_at, i.fetched_at),
 			COALESCE((i.engagement->>'points')::int, 0), COALESCE(i.triage, '{}'::jsonb)::text,
-			s.section, s.lang, s.weight
-		FROM items i JOIN sources s ON s.id = i.source_id WHERE i.cluster_id = $1`, id)
+			s.section, s.lang, GREATEST($2::real, LEAST($3::real, s.weight + s.weight_adj))
+		FROM items i JOIN sources s ON s.id = i.source_id WHERE i.cluster_id = $1`, id, brain.MinWeight, brain.MaxWeight)
 	if err != nil {
 		return err
 	}
@@ -201,7 +205,7 @@ func (p *pipeline) refreshCluster(ctx context.Context, id int64) error {
 		Engagement:  maxPts,
 		AvgWeight:   sumW / float64(len(srcSeen)),
 		Relevance:   maxRel,
-		TopicWeight: brain.BestTopicWeight(topics, p.cfg.Profile.Topics),
+		TopicWeight: brain.BestTopicWeight(topics, topicWeights),
 		BoostedHit:  brain.HasBoosted(strings.Join(titles, " "), p.cfg.Profile.BoostedKeywords),
 		AgeHours:    p.now().Sub(first).Hours(),
 	}

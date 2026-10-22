@@ -113,6 +113,14 @@ type fakeTG struct {
 	msgs     []sent
 	failAt   int // gửi thứ N (1-based) trả lỗi một lần; 0 = không
 	failOnce bool
+	edits    []edit
+	answers  []string
+	webhooks []string
+}
+
+type edit struct {
+	msgID  int64
+	markup *telegram.Markup
 }
 
 func (f *fakeTG) SendMessage(_ context.Context, text string, m *telegram.Markup) (int64, error) {
@@ -124,6 +132,27 @@ func (f *fakeTG) SendMessage(_ context.Context, text string, m *telegram.Markup)
 	}
 	f.msgs = append(f.msgs, sent{text, m})
 	return int64(1000 + len(f.msgs)), nil
+}
+
+func (f *fakeTG) EditMessageReplyMarkup(_ context.Context, id int64, m *telegram.Markup) error {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	f.edits = append(f.edits, edit{id, m})
+	return nil
+}
+
+func (f *fakeTG) AnswerCallbackQuery(_ context.Context, id, text string) error {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	f.answers = append(f.answers, id+"|"+text)
+	return nil
+}
+
+func (f *fakeTG) SetWebhook(_ context.Context, url, secret string) error {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	f.webhooks = append(f.webhooks, url+"|"+secret)
+	return nil
 }
 
 func newTestPipeline(t *testing.T, sources []config.Source) (*pipeline, *fakeLLM, *fakeTG) {

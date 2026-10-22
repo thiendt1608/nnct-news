@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 	_ "time/tzdata" // container có thể thiếu zoneinfo; digest_date theo Asia/Ho_Chi_Minh
 
@@ -18,7 +19,7 @@ import (
 
 var secrets struct {
 	TelegramBotToken      string
-	TelegramWebhookSecret string // dùng ở phase 2 (webhook)
+	TelegramWebhookSecret string // secret_token của setWebhook, so với header X-Telegram-Bot-Api-Secret-Token
 	TelegramChatID        string
 	GeminiAPIKey          string
 }
@@ -41,6 +42,9 @@ type LLM interface {
 // Sender is the subset of telegram.Client the pipeline needs.
 type Sender interface {
 	SendMessage(ctx context.Context, text string, m *telegram.Markup) (int64, error)
+	EditMessageReplyMarkup(ctx context.Context, messageID int64, m *telegram.Markup) error
+	AnswerCallbackQuery(ctx context.Context, id, text string) error
+	SetWebhook(ctx context.Context, url, secret string) error
 }
 
 // Fetcher downloads an article (fakeable in tests).
@@ -56,6 +60,10 @@ type pipeline struct {
 	sleep   func(ctx context.Context, d time.Duration) error
 	// publicBase is the public API base URL for /r/:id buttons; empty → link thẳng bài gốc.
 	publicBase string
+	// webhookSecret và chatID: xác thực webhook và allowlist chat (bot cá nhân).
+	webhookSecret string
+	chatID        string
+	webhookSet    atomic.Bool
 
 	runMu sync.Mutex
 }
@@ -122,7 +130,9 @@ func newPipeline() (*pipeline, error) {
 			Token:  func() string { return secrets.TelegramBotToken },
 			ChatID: func() string { return secrets.TelegramChatID },
 		},
-		now: time.Now,
+		now:           time.Now,
+		webhookSecret: secrets.TelegramWebhookSecret,
+		chatID:        secrets.TelegramChatID,
 	}
 	art := extract.NewClient(false)
 	p.article = func(ctx context.Context, u string) (extract.Result, error) { return extract.Fetch(ctx, art, u) }

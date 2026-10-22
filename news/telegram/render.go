@@ -105,9 +105,27 @@ func build(e Entry, ctx string, points []string) string {
 	return strings.TrimRight(b.String(), "\n")
 }
 
-// ItemMarkup is the MVP keyboard: a single URL button (không cần webhook).
-func ItemMarkup(url string) *Markup {
-	return &Markup{InlineKeyboard: [][]Button{{{Text: "📖 Đọc bài gốc", URL: url}}}}
+// Voted is which feedback buttons were already pressed on a cluster.
+type Voted struct{ Up, Down, Save bool }
+
+// CallbackData builds the callback_data of a button ("up:12", "src:12", ...), ≤ 64 bytes.
+func CallbackData(action string, clusterID int64) string {
+	return fmt.Sprintf("%s:%d", action, clusterID)
+}
+
+// ItemMarkup is the keyboard under each item: link buttons on top, feedback below.
+// Nút đã bấm đổi thành ✅.
+func ItemMarkup(url string, clusterID int64, v Voted) *Markup {
+	btn := func(done bool, label, doneLabel, action string) Button {
+		if done {
+			label = "✅ " + doneLabel
+		}
+		return Button{Text: label, CallbackData: CallbackData(action, clusterID)}
+	}
+	return &Markup{InlineKeyboard: [][]Button{
+		{{Text: "📖 Đọc bài gốc", URL: url}, {Text: "📚 Nguồn khác", CallbackData: CallbackData("src", clusterID)}},
+		{btn(v.Up, "👍", "👍", "up"), btn(v.Down, "👎", "👎", "down"), btn(v.Save, "🔖 Lưu", "Đã lưu", "save")},
+	}}
 }
 
 var weekdays = []string{"Chủ nhật", "thứ Hai", "thứ Ba", "thứ Tư", "thứ Năm", "thứ Sáu", "thứ Bảy"}

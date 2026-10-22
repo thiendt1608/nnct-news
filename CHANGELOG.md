@@ -1,6 +1,8 @@
 # Changelog
 
 ## Unreleased
+- feat: webhook Telegram `/telegram/webhook` (T2.1) — bắt buộc header `X-Telegram-Bot-Api-Secret-Token` (sai/thiếu → 401), chỉ xử lý update từ `TelegramChatID`, tự `setWebhook` từ cron ingest.
+- feat: nút 👍 👎 🔖 📚 dưới mỗi tin (T2.2) — bấm đổi thành ✅, mỗi tin một phiếu 👍/👎 và một 🔖 (bấm lại không cộng dồn); 👍/🔖 cộng +0.05 topic / +0.02 nguồn, 👎 trừ 0.10 / 0.04, kẹp [0.2, 2.0]; nguồn aggregator không bị học. Trọng số học được lưu ở `profile.topic_adj` và `sources.weight_adj` (không bị `sources.yaml` ghi đè) và dùng ở lần tính hot score kế tiếp. Migration `2_feedback`.
 - feat: mở rộng danh sách chủ đề triage (agents, research, backend, cloud, architecture, system-design, software-engineering, algorithms, technology) kèm định nghĩa trong prompt; giữ nguyên `vn-tech-startup`.
 - fix: section `vn` chỉ cho tin gắn chủ đề `vn-tech-startup`; báo VN đưa tin quốc tế (OpenAI, chip AI...) theo chủ đề thay vì bị gắn VN (11/120 tin chấm sai section, 7 ca do lỗi này).
 - fix: section của cluster theo chủ đề chính (không theo nguồn).

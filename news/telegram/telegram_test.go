@@ -67,9 +67,15 @@ func TestRenderTruncatesTo4096(t *testing.T) {
 }
 
 func TestMarkupAndHeader(t *testing.T) {
-	b, _ := json.Marshal(ItemMarkup("https://x/r/1"))
-	if string(b) != `{"inline_keyboard":[[{"text":"📖 Đọc bài gốc","url":"https://x/r/1"}]]}` {
+	b, _ := json.Marshal(ItemMarkup("https://x/r/1", 7, Voted{}))
+	want := `{"inline_keyboard":[[{"text":"📖 Đọc bài gốc","url":"https://x/r/1"},{"text":"📚 Nguồn khác","callback_data":"src:7"}],` +
+		`[{"text":"👍","callback_data":"up:7"},{"text":"👎","callback_data":"down:7"},{"text":"🔖 Lưu","callback_data":"save:7"}]]}`
+	if string(b) != want {
 		t.Fatal(string(b))
+	}
+	m := ItemMarkup("https://x", 7, Voted{Up: true, Save: true})
+	if r := m.InlineKeyboard[1]; r[0].Text != "✅ 👍" || r[1].Text != "👎" || r[2].Text != "✅ Đã lưu" {
+		t.Fatalf("%+v", r)
 	}
 	h := RenderHeader(time.Date(2026, 10, 15, 6, 0, 0, 0, time.UTC), 20, map[string]int{"ai": 6, "tech": 6, "vn": 5, "dev": 3}, 3)
 	if !strings.Contains(h, "thứ Năm 15/10 — 20 tin") || !strings.Contains(h, "🔥 Nóng (3) · 🤖 AI (6) · 🌍 Tech (6) · 🛠 Dev (3) · 🇻🇳 VN (5)") {
@@ -97,7 +103,7 @@ func TestSendMessageAndRetryAfter(t *testing.T) {
 	var slept []time.Duration
 	c := &Client{BaseURL: srv.URL, Token: func() string { return "SECRETTOKEN" }, ChatID: func() string { return "123" },
 		Sleep: func(_ context.Context, d time.Duration) error { slept = append(slept, d); return nil }}
-	id, err := c.SendMessage(context.Background(), "hi", ItemMarkup("https://x"))
+	id, err := c.SendMessage(context.Background(), "hi", ItemMarkup("https://x", 1, Voted{}))
 	if err != nil || id != 42 {
 		t.Fatalf("%v %d", err, id)
 	}
@@ -130,5 +136,32 @@ func TestErrorsDoNotLeakToken(t *testing.T) {
 	c.BaseURL = srv2.URL
 	if _, err := c.SendMessage(context.Background(), "x", nil); err == nil || !strings.Contains(err.Error(), "400") {
 		t.Fatal(err)
+	}
+}
+
+func TestParseCallbackAndAllowedChat(t *testing.T) {
+	for data, want := range map[string]string{"up:12": "up", "down:1": "down", "save:3": "save", "src:9": "src"} {
+		a, id, ok := ParseCallback(data)
+		if !ok || a != want || id <= 0 {
+			t.Errorf("%s → %s %d %v", data, a, id, ok)
+		}
+	}
+	for _, bad := range []string{"", "up", "up:", "up:0", "up:-1", "up:x", "rm:1", "UP:1", "up:1:2"} {
+		if _, _, ok := ParseCallback(bad); ok {
+			t.Errorf("%q phải bị từ chối", bad)
+		}
+	}
+	if !AllowedChat(123, " 123 ") || AllowedChat(124, "123") || AllowedChat(1, "") || AllowedChat(1, "@me") {
+		t.Fatal("allowlist chat")
+	}
+	var u Update
+	if err := json.Unmarshal([]byte(`{"update_id":1,"callback_query":{"id":"c","data":"up:1","message":{"message_id":5,"chat":{"id":123}}}}`), &u); err != nil {
+		t.Fatal(err)
+	}
+	if id, ok := u.ChatID(); !ok || id != 123 || u.CallbackQuery.Message.MessageID != 5 {
+		t.Fatal("parse callback update")
+	}
+	if _, ok := (Update{}).ChatID(); ok {
+		t.Fatal("update rỗng không có chat")
 	}
 }

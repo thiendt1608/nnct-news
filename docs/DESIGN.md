@@ -285,6 +285,8 @@ Inline keyboard:
 - `📖 Đọc bài gốc` là URL button trỏ tới `/r/:clusterID`, server 302 sang bài gốc → ghi nhận click (tín hiệu sở thích mạnh nhất, chỉ là data của chính mình).
 - `📚 Nguồn khác` → callback, bot reply danh sách link các báo khác trong cluster.
 - Bấm 👍/👎/🔖 → `editMessageReplyMarkup` đổi nút đã bấm thành ✅.
+  - Mỗi tin một phiếu 👍/👎 (phiếu đến sau bị bỏ qua) và một 🔖; unique index trên `feedback` chặn cộng dồn khi bấm lại.
+  - 🔖 học như 👍 (+0.05 / +0.02). Click `📖` chưa học (làm khi có dữ liệu thật).
 - Một tin dài nhất ~1.500 ký tự, dư so với giới hạn 4.096 ký tự/message. Renderer vẫn kiểm độ dài và cắt `key_points` nếu vượt.
 
 ### 6.2 Lệnh bot
