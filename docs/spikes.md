@@ -5,7 +5,7 @@
 - pgvector local = **0.8.2** (đo từ test). AC2 trong PLAN ghi `0.7.0` là số cũ → chấp nhận ≥ 0.7.0. Encore Cloud chưa kiểm.
 
 ## T0.7 Kiểm nguồn — ĐÃ KIỂM (2026-10-14, `go run ./tools/check-sources`)
-19/20 nguồn trả 200 + có item. `venturebeat-ai` trả 429 → `enabled: false`. Số item là đếm thô theo tag, chỉ để xác nhận feed sống. Điều khoản Reddit API: chưa kiểm (Reddit thuộc phase 2).
+19/20 nguồn trả 200 + có item. `venturebeat-ai` trả 429 → `enabled: false`. Số item là đếm thô theo tag, chỉ để xác nhận feed sống. Reddit đã bỏ khỏi kế hoạch (nguồn kém uy tín).
 
 ## T0.6 Gemini — chạy 2026-10-14 (`tools/spike-gemini`), một phần
 Đã kiểm (model ID đúng, HTTP 200):

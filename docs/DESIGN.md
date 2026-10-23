@@ -15,7 +15,7 @@
 
 | # | Yêu cầu | Đo bằng |
 |---|---|---|
-| R1 | Gom tin từ nhiều nguồn: báo lớn VN và thế giới, Hacker News, Reddit, blog của các lab AI | số nguồn active trong `sources.yaml` |
+| R1 | Gom tin từ nhiều nguồn: báo lớn VN và thế giới, Hacker News, blog của các lab AI | số nguồn active trong `sources.yaml` |
 | R2 | Lọc tin loãng, chỉ giữ chủ đề mình quan tâm | tỉ lệ 👎 / tổng tin trong digest < 20% |
 | R3 | Xác định tin "nóng" (nhiều nguồn cùng đưa, engagement cao) | có `hot_score` kèm lý do |
 | R4 | Tóm tắt tiếng Việt **dễ hiểu, đủ ý** (bối cảnh, chi tiết chính, ý nghĩa), không bịa | tóm tắt chỉ dựa trên text bài gốc đã fetch |
@@ -34,7 +34,6 @@ flowchart LR
   subgraph Sources
     RSS[RSS báo VN + quốc tế]
     HN[Hacker News API]
-    RD[Reddit API]
     BLOG[Blog lab AI / RSS]
   end
 
@@ -67,7 +66,7 @@ flowchart LR
 
 Hai nhịp tách riêng:
 
-- **Ingest 2 giờ/lần** → cluster lớn dần khi nhiều báo cùng đưa một sự kiện, engagement (HN points, Reddit upvotes) có thời gian tích luỹ. Đây là tín hiệu "nóng".
+- **Ingest 2 giờ/lần** → cluster lớn dần khi nhiều báo cùng đưa một sự kiện, engagement (HN points) có thời gian tích luỹ. Đây là tín hiệu "nóng".
 - **Digest 1 lần/ngày** → chỉ tóm tắt 20 tin được chọn.
 
 ---
@@ -107,7 +106,7 @@ Nguyên tắc: **chỉ dùng RSS và API chính thức, miễn phí**, không sc
 | Tech VN | VnExpress Số hoá, Tuổi Trẻ Nhịp sống số, Thanh Niên Công nghệ, VietnamNet ICT, Genk, Znews Công nghệ | RSS | URL feed từng trang **not verified**, kiểm khi setup |
 | Tech thế giới | TechCrunch, The Verge, Ars Technica, Wired, MIT Technology Review, Reuters Technology | RSS | Trang paywall: chỉ dùng title + snippet |
 | AI | Blog OpenAI, Anthropic, Google DeepMind, Meta AI, Hugging Face; HF Daily Papers | RSS | Không lấy arXiv thô |
-| Cộng đồng | Hacker News (Firebase API: top/best stories), Reddit (r/MachineLearning, r/LocalLLaMA, r/programming) | API | Engagement dùng cho `hot_score`. Điều khoản Reddit API cho dự án cá nhân: **not verified** |
+| Cộng đồng | Hacker News (Firebase API: top/best stories) | API | Engagement dùng cho `hot_score`. Không dùng Reddit: nguồn kém uy tín (quyết định của owner 2026-10-23) |
 | Dev | GitHub Blog, release của Go/Next.js/Rust/Tauri/Encore | RSS / GitHub Releases Atom | |
 
 Khai báo trong `config/sources.yaml` (embed vào binary bằng `//go:embed`):
@@ -197,7 +196,7 @@ Tính lại cho cluster mỗi khi có item mới:
 
 ```
 hot = 1.5 · ln(1 + n_sources)          # nhiều báo cùng đưa = nóng
-    + 1.0 · engagement_norm            # HN points / Reddit upvotes, chuẩn hoá theo percentile của từng nguồn
+    + 1.0 · engagement_norm            # HN points, chuẩn hoá theo percentile của từng nguồn
     + 0.8 · avg(source.weight)
     + 1.2 · relevance/10 · topic_weight
     + 0.3 · boosted_keyword_hit
@@ -368,7 +367,7 @@ nnct-news/
     cron.go                  # cron.NewJob ingest / digest / cleanup
     api_bot.go               # //encore:api public raw path=/telegram/webhook
     api_redirect.go          # //encore:api public raw path=/r/:id
-    ingest/   rss.go hn.go reddit.go normalize.go dedupe.go
+    ingest/   rss.go hn.go normalize.go dedupe.go
     llm/      client.go (throttle, retry, budget, fallback chain)
     brain/    triage.go embed.go cluster.go score.go select.go summarize.go
     telegram/ client.go render.go commands.go
@@ -491,7 +490,7 @@ Con số đọc từ ảnh chụp, Google có thể đổi bất cứ lúc nào 
 |---|---|---|
 | **0. Setup** | Bot qua @BotFather; Gemini API key ở AI Studio trong **project riêng, không billing**, kiểm lại rate limit có khớp §9.1; `encore app create` (Go); migration bật `vector`, test `halfvec` qua `sqldb`; so sánh chất lượng tóm tắt 3.5 vs 3.1 Flash-Lite, test structured output của Gemma 4, đo cách batch embed tính vào RPD; `sources.yaml` ~20 nguồn RSS + HN | gọi tay `ingest` chạy được, DB có item + embedding |
 | **1. MVP** | LLM client (throttle/retry/budget/fallback), triage → cluster → score → select → summarize → gửi từng message, resume digest, nút 📖 | 7 ngày liên tiếp có đủ 20 tin trước 8:00 |
-| **2. Cá nhân hoá** | 👍 👎 🔖 📚, redirect click, học trọng số, `/more` `/saved` `/mute` `/status`, Reddit | tỉ lệ 👎 giảm sau 2 tuần |
+| **2. Cá nhân hoá** | 👍 👎 🔖 📚, redirect click, học trọng số, `/more` `/saved` `/mute` `/status` | tỉ lệ 👎 giảm sau 2 tuần |
 | **3. Tuỳ chọn** | Weekly recap Chủ nhật, newsletter qua email, Bluesky (API mở, free) | tuỳ nhu cầu |
 
 ---
