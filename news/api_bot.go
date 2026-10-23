@@ -31,6 +31,7 @@ func Webhook(w http.ResponseWriter, req *http.Request) {
 func (p *pipeline) serveWebhook(w http.ResponseWriter, req *http.Request) {
 	got := req.Header.Get("X-Telegram-Bot-Api-Secret-Token")
 	if p.webhookSecret == "" || subtle.ConstantTimeCompare([]byte(got), []byte(p.webhookSecret)) != 1 {
+		rlog.Warn("webhook: từ chối request sai secret", "header_present", got != "")
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
 		return
 	}
