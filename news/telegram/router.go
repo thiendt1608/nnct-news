@@ -61,3 +61,18 @@ func ParseCallback(data string) (action string, clusterID int64, ok bool) {
 	}
 	return "", 0, false
 }
+
+// ParseCommand splits "/cmd@bot arg…" into a lowercase command and its trimmed argument.
+// ok is false for text that is not a bot command.
+func ParseCommand(text string) (cmd, arg string, ok bool) {
+	text = strings.TrimSpace(text)
+	if !strings.HasPrefix(text, "/") || len(text) < 2 {
+		return "", "", false
+	}
+	head, rest, _ := strings.Cut(text[1:], " ")
+	head, _, _ = strings.Cut(head, "@")
+	if head == "" {
+		return "", "", false
+	}
+	return strings.ToLower(head), strings.TrimSpace(rest), true
+}

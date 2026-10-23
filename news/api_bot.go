@@ -61,7 +61,12 @@ func (p *pipeline) handleUpdate(ctx context.Context, u telegram.Update) error {
 	if q := u.CallbackQuery; q != nil {
 		return p.handleCallback(ctx, q)
 	}
-	return nil // lệnh /today, /more, ... thêm ở T2.3
+	if m := u.Message; m != nil {
+		if cmd, arg, ok := telegram.ParseCommand(m.Text); ok {
+			return p.handleCommand(ctx, cmd, arg)
+		}
+	}
+	return nil
 }
 
 var feedbackAck = map[string]string{"up": "👍 Đã ghi nhận", "down": "👎 Đã ghi nhận", "save": "🔖 Đã lưu"}

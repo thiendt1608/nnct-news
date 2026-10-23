@@ -229,6 +229,10 @@ func (p *pipeline) bumpAttempts(ctx context.Context, ids []int64) error {
 
 func (p *pipeline) triage(ctx context.Context, st *IngestStats) error {
 	s := p.cfg.Settings
+	muted, _, err := p.keywords(ctx)
+	if err != nil {
+		return err
+	}
 	for b := 0; b < s.TriageMaxBatches; b++ {
 		rows, err := db.Query(ctx, `SELECT id, title, COALESCE(snippet,''), source_id FROM items
 			WHERE state = 'new' AND attempts < 5 ORDER BY published_at DESC, id DESC LIMIT $1`, s.TriageBatch)
@@ -279,7 +283,7 @@ func (p *pipeline) triage(ctx context.Context, st *IngestStats) error {
 				missing = append(missing, in.ID)
 				continue
 			}
-			keep, reason := brain.TriageVerdict(r, in.Title, s.MinRelevance, p.cfg.Profile.MutedKeywords)
+			keep, reason := brain.TriageVerdict(r, in.Title, s.MinRelevance, muted)
 			state := "triaged"
 			if !keep {
 				state = "dropped"

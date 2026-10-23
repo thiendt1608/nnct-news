@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- feat: lệnh bot (T2.3) — `/today` `/more [section|chủ đề] [trang]` `/saved` `/search` `/mute` `/unmute` `/boost` `/unboost` `/status` `/help`. `/today` và `/more` trả danh sách link (không gửi lại tin đầy đủ, `/more` chưa tóm tắt nên không tốn quota Gemini). Từ khoá thêm từ bot lưu ở `profile.muted_extra`/`boosted_extra`, gộp với `profile.yaml` ở triage và hot score.
 - feat: cron `cleanup` mỗi ngày (T2.5) — xoá bài/cluster cũ hơn `retention_days` (30) trừ cluster đã gửi hoặc có feedback; bài giữ lại bỏ embedding, cluster cũ bỏ centroid; xoá `llm_usage` quá hạn; log `pg_database_size`.
 - fix: log request webhook bị từ chối; secret `TelegramWebhookSecret` phải thuộc `A-Za-z0-9_-` (Telegram từ chối ký tự khác khi `setWebhook`).
 - feat: webhook Telegram `/telegram/webhook` (T2.1) — bắt buộc header `X-Telegram-Bot-Api-Secret-Token` (sai/thiếu → 401), chỉ xử lý update từ `TelegramChatID`, tự `setWebhook` từ cron ingest.

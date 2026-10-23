@@ -109,15 +109,19 @@ func (p *pipeline) refreshClusters(ctx context.Context, since time.Time) error {
 	if err != nil {
 		return err
 	}
+	_, boosted, err := p.keywords(ctx)
+	if err != nil {
+		return err
+	}
 	for _, id := range ids {
-		if err := p.refreshCluster(ctx, id, tw); err != nil {
+		if err := p.refreshCluster(ctx, id, tw, boosted); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (p *pipeline) refreshCluster(ctx context.Context, id int64, topicWeights map[string]float64) error {
+func (p *pipeline) refreshCluster(ctx context.Context, id int64, topicWeights map[string]float64, boosted []string) error {
 	rows, err := db.Query(ctx, `SELECT i.source_id, i.title, COALESCE(i.published_at, i.fetched_at),
 			COALESCE((i.engagement->>'points')::int, 0), COALESCE(i.triage, '{}'::jsonb)::text,
 			s.section, s.lang, GREATEST($2::real, LEAST($3::real, s.weight + s.weight_adj))
@@ -206,7 +210,7 @@ func (p *pipeline) refreshCluster(ctx context.Context, id int64, topicWeights ma
 		AvgWeight:   sumW / float64(len(srcSeen)),
 		Relevance:   maxRel,
 		TopicWeight: brain.BestTopicWeight(topics, topicWeights),
-		BoostedHit:  brain.HasBoosted(strings.Join(titles, " "), p.cfg.Profile.BoostedKeywords),
+		BoostedHit:  brain.HasBoosted(strings.Join(titles, " "), boosted),
 		AgeHours:    p.now().Sub(first).Hours(),
 	}
 	reason := brain.Score(in)

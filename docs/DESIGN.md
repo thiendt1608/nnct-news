@@ -293,10 +293,10 @@ Inline keyboard:
 
 | Lệnh | Việc |
 |---|---|
-| `/today` | Gửi lại digest hôm nay |
-| `/more ai` | Thêm 5 tin tiếp theo của section/topic (tóm tắt on-demand, tính vào budget) |
+| `/today` | Danh sách link digest hôm nay (không gửi lại tin đầy đủ: >20 giây trong một request webhook) |
+| `/more [ai\|tech\|dev\|vn\|topic] [trang]` | 5 tin tiếp theo chưa gửi, dạng link, chưa tóm tắt (không tốn budget) |
 | `/saved` | Danh sách tin đã 🔖 |
-| `/mute <từ khoá>` / `/boost <từ khoá>` | Sửa profile nhanh |
+| `/mute` `/unmute` `/boost` `/unboost <từ khoá>` | Sửa profile nhanh (lưu `profile.muted_extra`/`boosted_extra`, gộp với `profile.yaml`) |
 | `/status` | Tình trạng nguồn, request Gemini đã dùng hôm nay, dung lượng DB |
 | `/search <từ khoá>` | Tìm trong 7 ngày gần nhất |
 
