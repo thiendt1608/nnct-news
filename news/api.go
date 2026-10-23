@@ -55,6 +55,29 @@ var _ = cron.NewJob("digest", cron.JobConfig{
 	Endpoint: Digest,
 })
 
+// Cleanup deletes data past the retention window (xem runCleanup) and logs the DB size,
+// vì free tier của Encore giới hạn dung lượng DB.
+//
+//encore:api private
+func Cleanup(ctx context.Context) error {
+	p, err := getPipeline()
+	if err != nil {
+		return err
+	}
+	st, err := p.runCleanup(ctx)
+	rlog.Info("cleanup", "items_deleted", st.ItemsDeleted, "embeddings_shrunk", st.EmbeddingsShrunk,
+		"centroids_shrunk", st.CentroidsShrunk, "clusters_deleted", st.ClustersDeleted,
+		"usage_deleted", st.UsageDeleted, "db_mb", st.DBSizeBytes>>20)
+	return err
+}
+
+// Mỗi ngày một lần; Encore free tier random phút.
+var _ = cron.NewJob("cleanup", cron.JobConfig{
+	Title:    "Dọn dữ liệu cũ",
+	Every:    24 * cron.Hour,
+	Endpoint: Cleanup,
+})
+
 // Redirect sends the reader to the best original article of a cluster and records a click.
 // The target comes only from the DB, never from the request.
 //

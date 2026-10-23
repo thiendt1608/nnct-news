@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- feat: cron `cleanup` mỗi ngày (T2.5) — xoá bài/cluster cũ hơn `retention_days` (30) trừ cluster đã gửi hoặc có feedback; bài giữ lại bỏ embedding, cluster cũ bỏ centroid; xoá `llm_usage` quá hạn; log `pg_database_size`.
 - fix: log request webhook bị từ chối; secret `TelegramWebhookSecret` phải thuộc `A-Za-z0-9_-` (Telegram từ chối ký tự khác khi `setWebhook`).
 - feat: webhook Telegram `/telegram/webhook` (T2.1) — bắt buộc header `X-Telegram-Bot-Api-Secret-Token` (sai/thiếu → 401), chỉ xử lý update từ `TelegramChatID`, tự `setWebhook` từ cron ingest.
 - feat: nút 👍 👎 🔖 📚 dưới mỗi tin (T2.2) — bấm đổi thành ✅, mỗi tin một phiếu 👍/👎 và một 🔖 (bấm lại không cộng dồn); 👍/🔖 cộng +0.05 topic / +0.02 nguồn, 👎 trừ 0.10 / 0.04, kẹp [0.2, 2.0]; nguồn aggregator không bị học. Trọng số học được lưu ở `profile.topic_adj` và `sources.weight_adj` (không bị `sources.yaml` ghi đè) và dùng ở lần tính hot score kế tiếp. Migration `2_feedback`.

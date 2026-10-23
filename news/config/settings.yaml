@@ -23,4 +23,5 @@ max_per_section: 7
 min_vn: 3
 max_per_topic: 4
 resend_min_new_sources: 3
+retention_days: 30
 telegram_pacing: 1100ms

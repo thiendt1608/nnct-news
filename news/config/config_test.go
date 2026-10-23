@@ -40,7 +40,7 @@ func TestLoadEmbedded(t *testing.T) {
 func TestParseErrors(t *testing.T) {
 	good := "sources:\n  - {id: a, kind: rss, url: u, section: vn}\n"
 	prof := "topics: {}\n"
-	set := "models: {m: {}}\ntriage_models: [m]\nsummary_models: [m]\nembedding_model: m\nembedding_dim: 768\ndigest_size: 20\ntriage_batch: 40\nembed_batch: 80\ncluster_threshold: 0.8\n"
+	set := "models: {m: {}}\ntriage_models: [m]\nsummary_models: [m]\nembedding_model: m\nembedding_dim: 768\ndigest_size: 20\ntriage_batch: 40\nembed_batch: 80\ncluster_threshold: 0.8\nretention_days: 30\n"
 	if _, err := Parse([]byte(good), []byte(prof), []byte(set)); err != nil {
 		t.Fatal(err)
 	}
@@ -50,6 +50,7 @@ func TestParseErrors(t *testing.T) {
 		"trùng id":       {good + "  - {id: a, kind: rss, url: u, section: vn}\n", prof, set},
 		"model không có": {good, prof, strings.Replace(set, "triage_models: [m]", "triage_models: [zz]", 1)},
 		"threshold":      {good, prof, strings.Replace(set, "0.8", "1.5", 1)},
+		"retention":      {good, prof, strings.Replace(set, "retention_days: 30", "retention_days: 1", 1)},
 	}
 	for name, c := range cases {
 		if _, err := Parse([]byte(c[0]), []byte(c[1]), []byte(c[2])); err == nil {

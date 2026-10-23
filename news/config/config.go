@@ -64,6 +64,7 @@ type Settings struct {
 	MinVN            int `yaml:"min_vn"`
 	MaxPerTopic      int `yaml:"max_per_topic"`
 	ResendMinNewSrc  int `yaml:"resend_min_new_sources"`
+	RetentionDays    int `yaml:"retention_days"` // cleanup: xoá bài cũ hơn N ngày (trừ bài đã gửi/có feedback)
 
 	ClusterThreshold float64       `yaml:"cluster_threshold"`
 	TelegramPacing   time.Duration `yaml:"telegram_pacing"`
@@ -139,6 +140,9 @@ func (c *Config) validate() error {
 	}
 	if st.EmbeddingDim <= 0 || st.DigestSize <= 0 || st.TriageBatch <= 0 || st.EmbedBatch <= 0 {
 		return fmt.Errorf("settings: embedding_dim/digest_size/triage_batch/embed_batch phải > 0")
+	}
+	if st.RetentionDays < 7 { // phải dài hơn cửa sổ cluster/resend; 0 (thiếu key) không được hiểu là "xoá hết"
+		return fmt.Errorf("settings: retention_days phải ≥ 7")
 	}
 	if st.ClusterThreshold <= 0 || st.ClusterThreshold >= 1 {
 		return fmt.Errorf("settings: cluster_threshold phải trong (0,1)")
